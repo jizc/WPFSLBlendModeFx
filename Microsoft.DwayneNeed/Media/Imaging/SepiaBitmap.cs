@@ -1,10 +1,10 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-
-namespace Microsoft.DwayneNeed.Media.Imaging
+﻿namespace Microsoft.DwayneNeed.Media.Imaging
 {
+    using System;
+    using System.Windows;
+    using System.Windows.Media;
+    using System.Windows.Media.Imaging;
+
     /// <summary>
     ///     The SepiaBitmap class processes a source and converts the
     ///     image to a sepia color scheme.
@@ -16,8 +16,6 @@ namespace Microsoft.DwayneNeed.Media.Imaging
     /// </remarks>
     public class SepiaBitmap : ChainedBitmap
     {
-        #region BitmapSource Properties
-
         /// <summary>
         ///     Pixel format of the bitmap.
         /// </summary>
@@ -30,13 +28,13 @@ namespace Microsoft.DwayneNeed.Media.Imaging
             get
             {
                 // Preserve an alpha channel, if there is one.
-                PixelFormat format = base.Format;
-                if (format == PixelFormats.Bgra32 ||
-                    format == PixelFormats.Prgba64 ||
-                    format == PixelFormats.Pbgra32 ||
-                    format == PixelFormats.Prgba128Float ||
-                    format == PixelFormats.Rgba128Float ||
-                    format == PixelFormats.Rgba64)
+                var format = base.Format;
+                if (format == PixelFormats.Bgra32
+                    || format == PixelFormats.Prgba64
+                    || format == PixelFormats.Pbgra32
+                    || format == PixelFormats.Prgba128Float
+                    || format == PixelFormats.Rgba128Float
+                    || format == PixelFormats.Rgba64)
                 {
                     format = PixelFormats.Bgra32;
                 }
@@ -56,17 +54,7 @@ namespace Microsoft.DwayneNeed.Media.Imaging
         ///     We only support Bgr32 and Bgra32 pixel formats, so a palette
         ///     is never needed, so we return null.
         /// </remarks>
-        public override BitmapPalette Palette
-        {
-            get
-            {
-                return null;
-            }
-        }
-
-        #endregion BitmapSource Properties
-
-        #region BitmapSource CopyPixels
+        public override BitmapPalette Palette => null;
 
         /// <summary>
         ///     Requests pixels from the ChainedCustomBitmapSource.
@@ -92,7 +80,7 @@ namespace Microsoft.DwayneNeed.Media.Imaging
         /// </remarks>
         protected override void CopyPixelsCore(Int32Rect sourceRect, int stride, int bufferSize, IntPtr buffer)
         {
-            BitmapSource source = Source;
+            var source = Source;
             if (source != null)
             {
                 // First defer to the base implementation, which will fill in
@@ -108,23 +96,24 @@ namespace Microsoft.DwayneNeed.Media.Imaging
                 // array has already been pinned.
                 unsafe
                 {
-                    byte* pBytes = (byte*)buffer.ToPointer();
-                    for (int y = 0; y < sourceRect.Height; y++)
+                    var pBytes = (byte*)buffer.ToPointer();
+                    for (var y = 0; y < sourceRect.Height; y++)
                     {
-                        Bgra32Pixel* pPixel = (Bgra32Pixel*)pBytes;
+                        var pPixel = (Bgra32Pixel*)pBytes;
 
-                        for (int x = 0; x < sourceRect.Width; x++)
+                        for (var x = 0; x < sourceRect.Width; x++)
                         {
                             // Get the linear color space values of this pixel.
-                            Color c = Color.FromRgb(pPixel->Red, pPixel->Green, pPixel->Blue);
-                            float red = c.ScR;
-                            float green = c.ScG;
-                            float blue = c.ScB;
+                            var c = Color.FromRgb(pPixel->Red, pPixel->Green, pPixel->Blue);
+                            var red = c.ScR;
+                            var green = c.ScG;
+                            var blue = c.ScB;
 
-                            Color cSepia = Color.FromScRgb(1.0f,
-                                                           red * 0.393f + green * 0.769f + blue * 0.189f,
-                                                           red * 0.349f + green * 0.686f + blue * 0.168f,
-                                                           red * 0.272f + green * 0.534f + blue * 0.131f);
+                            var cSepia = Color.FromScRgb(
+                                1.0f,
+                                red * 0.393f + green * 0.769f + blue * 0.189f,
+                                red * 0.349f + green * 0.686f + blue * 0.168f,
+                                red * 0.272f + green * 0.534f + blue * 0.131f);
 
 
                             // Write sRGB (non-linear) since it is implied by
@@ -141,7 +130,5 @@ namespace Microsoft.DwayneNeed.Media.Imaging
                 }
             }
         }
-
-        #endregion BitmapSource CopyPixels
     }
 }

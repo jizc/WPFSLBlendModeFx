@@ -1,22 +1,19 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Effects;
-
-namespace BlendModeEffectLibrary
+﻿namespace BlendModeEffectLibrary
 {
-	public class ColorDodgeEffect : BlendModeEffect
-	{
-		static ColorDodgeEffect()
-		{
-			_pixelShader.UriSource = Global.MakePackUri("ShaderSource/ColorDodgeEffect.ps");
-		}
+    using System.Windows.Media.Effects;
 
-		public ColorDodgeEffect()
-		{
-			this.PixelShader = _pixelShader;
-		}
+    public class ColorDodgeEffect : BlendModeEffect
+    {
+        private static readonly PixelShader pixelShader = new PixelShader();
 
-		private static PixelShader _pixelShader = new PixelShader();
-	}
+        static ColorDodgeEffect()
+        {
+            pixelShader.UriSource = Global.MakePackUri("ShaderSource/ColorDodgeEffect.ps");
+        }
+
+        public ColorDodgeEffect()
+        {
+            PixelShader = pixelShader;
+        }
+    }
 }

@@ -1,22 +1,19 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Effects;
-
-namespace BlendModeEffectLibrary
+﻿namespace BlendModeEffectLibrary
 {
-	public class SoftLightEffect : BlendModeEffect
-	{
-		static SoftLightEffect()
-		{
-			_pixelShader.UriSource = Global.MakePackUri("ShaderSource/SoftLightEffect.ps");
-		}
+    using System.Windows.Media.Effects;
 
-		public SoftLightEffect()
-		{
-			this.PixelShader = _pixelShader;
-		}
+    public class SoftLightEffect : BlendModeEffect
+    {
+        private static readonly PixelShader pixelShader = new PixelShader();
 
-		private static PixelShader _pixelShader = new PixelShader();
-	}
+        static SoftLightEffect()
+        {
+            pixelShader.UriSource = Global.MakePackUri("ShaderSource/SoftLightEffect.ps");
+        }
+
+        public SoftLightEffect()
+        {
+            PixelShader = pixelShader;
+        }
+    }
 }

@@ -1,22 +1,19 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Effects;
-
-namespace BlendModeEffectLibrary
+﻿namespace BlendModeEffectLibrary
 {
-	public class OverlayEffect : BlendModeEffect
-	{
-		static OverlayEffect()
-		{
-			_pixelShader.UriSource = Global.MakePackUri("ShaderSource/OverlayEffect.ps");
-		}
+    using System.Windows.Media.Effects;
 
-		public OverlayEffect()
-		{
-			this.PixelShader = _pixelShader;
-		}
+    public class OverlayEffect : BlendModeEffect
+    {
+        private static readonly PixelShader pixelShader = new PixelShader();
 
-		private static PixelShader _pixelShader = new PixelShader();
-	}
+        static OverlayEffect()
+        {
+            pixelShader.UriSource = Global.MakePackUri("ShaderSource/OverlayEffect.ps");
+        }
+
+        public OverlayEffect()
+        {
+            PixelShader = pixelShader;
+        }
+    }
 }

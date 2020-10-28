@@ -1,38 +1,36 @@
-﻿using System;
-using System.Windows;
-using System.Reflection;
-using System.Text;
-
-namespace BlendModeEffectLibrary
+﻿namespace BlendModeEffectLibrary
 {
-	internal static class Global
-	{
-		public static Uri MakePackUri(string relativeFile)
-		{
-			StringBuilder uriString = new StringBuilder();
+    using System;
+    using System.Text;
+
+    internal static class Global
+    {
+        private static string s_assemblyShortName;
+
+        private static string AssemblyShortName
+        {
+            get
+            {
+                if (s_assemblyShortName is null)
+                {
+                    var a = typeof(Global).Assembly;
+
+                    // Pull out the short name.
+                    s_assemblyShortName = a.ToString().Split(',')[0];
+                }
+
+                return s_assemblyShortName;
+            }
+        }
+
+        public static Uri MakePackUri(string relativeFile)
+        {
+            var uriString = new StringBuilder();
 #if !SILVERLIGHT
-			uriString.Append("pack://application:,,,");
+            uriString.Append("pack://application:,,,");
 #endif
-			uriString.Append("/" + AssemblyShortName + ";component/" + relativeFile);
-			return new Uri(uriString.ToString(), UriKind.RelativeOrAbsolute);
-		}
-
-		private static string AssemblyShortName
-		{
-			get
-			{
-				if (_assemblyShortName == null)
-				{
-					Assembly a = typeof(Global).Assembly;
-
-					// Pull out the short name.
-					_assemblyShortName = a.ToString().Split(',')[0];
-				}
-
-				return _assemblyShortName;
-			}
-		}
-
-		private static string _assemblyShortName;
-	}
+            uriString.Append("/" + AssemblyShortName + ";component/" + relativeFile);
+            return new Uri(uriString.ToString(), UriKind.RelativeOrAbsolute);
+        }
+    }
 }

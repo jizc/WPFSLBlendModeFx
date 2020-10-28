@@ -1,22 +1,19 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Effects;
-
-namespace BlendModeEffectLibrary
+﻿namespace BlendModeEffectLibrary
 {
-	public class HardLightEffect : BlendModeEffect
-	{
-		static HardLightEffect()
-		{
-			_pixelShader.UriSource = Global.MakePackUri("ShaderSource/HardLightEffect.ps");
-		}
+    using System.Windows.Media.Effects;
 
-		public HardLightEffect()
-		{
-			this.PixelShader = _pixelShader;
-		}
+    public class HardLightEffect : BlendModeEffect
+    {
+        private static readonly PixelShader pixelShader = new PixelShader();
 
-		private static PixelShader _pixelShader = new PixelShader();
-	}
+        static HardLightEffect()
+        {
+            pixelShader.UriSource = Global.MakePackUri("ShaderSource/HardLightEffect.ps");
+        }
+
+        public HardLightEffect()
+        {
+            PixelShader = pixelShader;
+        }
+    }
 }

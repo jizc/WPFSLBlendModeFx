@@ -1,22 +1,19 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Effects;
-
-namespace BlendModeEffectLibrary
+﻿namespace BlendModeEffectLibrary
 {
-	public class ExclusionEffect : BlendModeEffect
-	{
-		static ExclusionEffect()
-		{
-			_pixelShader.UriSource = Global.MakePackUri("ShaderSource/ExclusionEffect.ps");
-		}
+    using System.Windows.Media.Effects;
 
-		public ExclusionEffect()
-		{
-			this.PixelShader = _pixelShader;
-		}
+    public class ExclusionEffect : BlendModeEffect
+    {
+        private static readonly PixelShader pixelShader = new PixelShader();
 
-		private static PixelShader _pixelShader = new PixelShader();
-	}
+        static ExclusionEffect()
+        {
+            pixelShader.UriSource = Global.MakePackUri("ShaderSource/ExclusionEffect.ps");
+        }
+
+        public ExclusionEffect()
+        {
+            PixelShader = pixelShader;
+        }
+    }
 }

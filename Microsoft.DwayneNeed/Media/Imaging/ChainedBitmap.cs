@@ -1,10 +1,10 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-
-namespace Microsoft.DwayneNeed.Media.Imaging
+﻿namespace Microsoft.DwayneNeed.Media.Imaging
 {
+    using System;
+    using System.Windows;
+    using System.Windows.Media;
+    using System.Windows.Media.Imaging;
+
     /// <summary>
     ///     The ChainedBitmap class is the base class for custom bitmaps that
     ///     processes the content of another source.
@@ -22,7 +22,139 @@ namespace Microsoft.DwayneNeed.Media.Imaging
     /// </remarks>
     public class ChainedBitmap : CustomBitmap
     {
-        #region Freezable
+        /// <summary>
+        ///     The DependencyProperty for the Source property.
+        /// </summary>
+        public static readonly DependencyProperty SourceProperty =
+            DependencyProperty.Register(
+                nameof(Source),
+                typeof(BitmapSource),
+                typeof(ChainedBitmap),
+                new FrameworkPropertyMetadata(OnSourcePropertyChanged));
+
+        private PixelFormat formatConverterSourceFormat;
+        private FormatConvertedBitmap formatConverter;
+
+        /// <summary>
+        ///     The BitmapSource to chain.
+        /// </summary>
+        public BitmapSource Source
+        {
+            get => (BitmapSource)GetValue(SourceProperty);
+            set => SetValue(SourceProperty, value);
+        }
+
+        /// <summary>
+        ///     Horizontal DPI of the bitmap.
+        /// </summary>
+        /// <remarks>
+        ///     Derived classes can override this to specify their own value.
+        ///     This implementation simply delegates to the source, if present.
+        /// </remarks>
+        public override double DpiX
+        {
+            get
+            {
+                var source = Source;
+                return source?.DpiX ?? base.DpiX;
+            }
+        }
+
+        /// <summary>
+        ///     Vertical DPI of the bitmap.
+        /// </summary>
+        /// <remarks>
+        ///     Derived classes can override this to specify their own value.
+        ///     This implementation simply delegates to the source, if present.
+        /// </remarks>
+        public override double DpiY
+        {
+            get
+            {
+                var source = Source;
+                return source?.DpiY ?? base.DpiY;
+            }
+        }
+
+        /// <summary>
+        ///     Pixel format of the bitmap.
+        /// </summary>
+        /// <remarks>
+        ///     Derived classes can override this to specify their own value.
+        ///     This implementation simply delegates to the source, if present.
+        /// </remarks>
+        public override PixelFormat Format
+        {
+            get
+            {
+                var source = Source;
+                return source?.Format ?? base.Format;
+            }
+        }
+
+        /// <summary>
+        ///     Width of the bitmap contents.
+        /// </summary>
+        /// <remarks>
+        ///     Derived classes can override this to specify their own value.
+        ///     This implementation simply delegates to the source, if present.
+        /// </remarks>
+        public override int PixelWidth
+        {
+            get
+            {
+                var source = Source;
+                return source?.PixelWidth ?? base.PixelWidth;
+            }
+        }
+
+        /// <summary>
+        ///     Height of the bitmap contents.
+        /// </summary>
+        /// <remarks>
+        ///     Derived classes can override this to specify their own value.
+        ///     This implementation simply delegates to the source, if present.
+        /// </remarks>
+        public override int PixelHeight
+        {
+            get
+            {
+                var source = Source;
+                return source?.PixelHeight ?? base.PixelHeight;
+            }
+        }
+
+        /// <summary>
+        ///     Palette of the bitmap.
+        /// </summary>
+        /// <remarks>
+        ///     Derived classes can override this to specify their own value.
+        ///     This implementation simply delegates to the source, if present.
+        /// </remarks>
+        public override BitmapPalette Palette
+        {
+            get
+            {
+                var source = Source;
+                return source?.Palette ?? base.Palette;
+            }
+        }
+
+        /// <summary>
+        ///     Whether or not the BitmapSource is downloading content.
+        /// </summary>
+        /// <remarks>
+        ///     Derived classes can override this to specify their own value.
+        ///     This implementation simply delegates to the source, if present.
+        /// </remarks>
+        public override bool IsDownloading
+        {
+            get
+            {
+                var source = Source;
+                return source != null && source.IsDownloading;
+            }
+        }
 
         /// <summary>
         ///     Creates an instance of the ChainedBitmap class.
@@ -31,10 +163,7 @@ namespace Microsoft.DwayneNeed.Media.Imaging
         ///     The new instance.  If you derive from this class, you must
         ///     override this method to return your own type.
         /// </returns>
-        protected override Freezable CreateInstanceCore()
-        {
-            return new ChainedBitmap();
-        }
+        protected override Freezable CreateInstanceCore() => new ChainedBitmap();
 
         /// <summary>
         ///     Transitions this instance into a thread-safe, read-only mode.
@@ -49,16 +178,14 @@ namespace Microsoft.DwayneNeed.Media.Imaging
         /// </remarks>
         protected override bool FreezeCore(bool isChecking)
         {
-            if (_formatConverter != null)
+            if (formatConverter != null)
             {
                 if (isChecking)
                 {
-                    return _formatConverter.CanFreeze;
+                    return formatConverter.CanFreeze;
                 }
-                else
-                {
-                    _formatConverter.Freeze();
-                }
+
+                formatConverter.Freeze();
             }
 
             return true;
@@ -85,68 +212,39 @@ namespace Microsoft.DwayneNeed.Media.Imaging
         /// </remarks>
         protected override void CopyCore(CustomBitmap original, bool useCurrentValue, bool willBeFrozen)
         {
-            ChainedBitmap originalChainedBitmap = (ChainedBitmap)original;
-            if (originalChainedBitmap._formatConverter != null)
+            var originalChainedBitmap = (ChainedBitmap)original;
+            if (originalChainedBitmap.formatConverter != null)
             {
                 if (useCurrentValue)
                 {
                     if (willBeFrozen)
                     {
-                        _formatConverter = (FormatConvertedBitmap)originalChainedBitmap._formatConverter.GetCurrentValueAsFrozen();
+                        formatConverter =
+                            (FormatConvertedBitmap)originalChainedBitmap.formatConverter.GetCurrentValueAsFrozen();
                     }
                     else
                     {
-                        _formatConverter = (FormatConvertedBitmap)originalChainedBitmap._formatConverter.CloneCurrentValue();
+                        formatConverter = originalChainedBitmap.formatConverter.CloneCurrentValue();
                     }
                 }
                 else
                 {
                     if (willBeFrozen)
                     {
-                        _formatConverter = (FormatConvertedBitmap)originalChainedBitmap._formatConverter.GetAsFrozen();
+                        formatConverter = (FormatConvertedBitmap)originalChainedBitmap.formatConverter.GetAsFrozen();
                     }
                     else
                     {
-                        _formatConverter = (FormatConvertedBitmap)originalChainedBitmap._formatConverter.Clone();
+                        formatConverter = originalChainedBitmap.formatConverter.Clone();
                     }
                 }
-            }
-        }
-
-        #endregion Freezable
-
-        #region Source
-
-        /// <summary>
-        ///     The DependencyProperty for the Source property.
-        /// </summary>
-        public static readonly DependencyProperty SourceProperty =
-              DependencyProperty.Register("Source",
-                               typeof(BitmapSource),
-                               typeof(ChainedBitmap),
-                               new FrameworkPropertyMetadata(OnSourcePropertyChanged));
-
-        /// <summary>
-        ///     The BitmapSource to chain.
-        /// </summary>
-        public BitmapSource Source
-        {
-            get
-            {
-                return (BitmapSource)GetValue(SourceProperty);
-            }
-
-            set
-            {
-                SetValue(SourceProperty, value);
             }
         }
 
         protected virtual void OnSourcePropertyChanged(DependencyPropertyChangedEventArgs e)
         {
             // Stop listening for the download and decode events on the old source.
-            BitmapSource oldValue = e.OldValue as BitmapSource;
-            if (oldValue != null)
+            if (e.OldValue is BitmapSource oldValue)
             {
                 oldValue.DownloadCompleted -= OnSourceDownloadCompleted;
                 oldValue.DownloadProgress -= OnSourceDownloadProgress;
@@ -155,8 +253,7 @@ namespace Microsoft.DwayneNeed.Media.Imaging
             }
 
             // Start listening for the download and decode events on the new source.
-            BitmapSource newValue = e.NewValue as BitmapSource;
-            if (newValue != null)
+            if (e.NewValue is BitmapSource newValue)
             {
                 newValue.DownloadCompleted += OnSourceDownloadCompleted;
                 newValue.DownloadProgress += OnSourceDownloadProgress;
@@ -164,209 +261,6 @@ namespace Microsoft.DwayneNeed.Media.Imaging
                 newValue.DecodeFailed += OnSourceDecodeFailed;
             }
         }
-
-        private static void OnSourcePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            ChainedBitmap chainedBitmap = (ChainedBitmap)d;
-            chainedBitmap.OnSourcePropertyChanged(e);
-        }
-
-        #endregion Source
-
-        #region BitmapSource Properties
-
-        /// <summary>
-        ///     Horizontal DPI of the bitmap.
-        /// </summary>
-        /// <remarks>
-        ///     Derived classes can override this to specify their own value.
-        ///     This implementation simply delegates to the source, if present.
-        /// </remarks>
-        public override double DpiX
-        {
-            get
-            {
-                BitmapSource source = Source;
-                if (source != null)
-                {
-                    return source.DpiX;
-                }
-                else
-                {
-                    return base.DpiX;
-                }
-            }
-        }
-
-        /// <summary>
-        ///     Vertical DPI of the bitmap.
-        /// </summary>
-        /// <remarks>
-        ///     Derived classes can override this to specify their own value.
-        ///     This implementation simply delegates to the source, if present.
-        /// </remarks>
-        public override double DpiY
-        {
-            get
-            {
-                BitmapSource source = Source;
-                if (source != null)
-                {
-                    return source.DpiY;
-                }
-                else
-                {
-                    return base.DpiY;
-                }
-            }
-        }
-
-        /// <summary>
-        ///     Pixel format of the bitmap.
-        /// </summary>
-        /// <remarks>
-        ///     Derived classes can override this to specify their own value.
-        ///     This implementation simply delegates to the source, if present.
-        /// </remarks>
-        public override PixelFormat Format
-        {
-            get
-            {
-                BitmapSource source = Source;
-                if (source != null)
-                {
-                    return source.Format;
-                }
-                else
-                {
-                    return base.Format;
-                }
-            }
-        }
-
-        /// <summary>
-        ///     Width of the bitmap contents.
-        /// </summary>
-        /// <remarks>
-        ///     Derived classes can override this to specify their own value.
-        ///     This implementation simply delegates to the source, if present.
-        /// </remarks>
-        public override int PixelWidth
-        {
-            get
-            {
-                BitmapSource source = Source;
-                if (source != null)
-                {
-                    return source.PixelWidth;
-                }
-                else
-                {
-                    return base.PixelWidth;
-                }
-            }
-        }
-
-        /// <summary>
-        ///     Height of the bitmap contents.
-        /// </summary>
-        /// <remarks>
-        ///     Derived classes can override this to specify their own value.
-        ///     This implementation simply delegates to the source, if present.
-        /// </remarks>
-        public override int PixelHeight
-        {
-            get
-            {
-                BitmapSource source = Source;
-                if (source != null)
-                {
-                    return source.PixelHeight;
-                }
-                else
-                {
-                    return base.PixelHeight;
-                }
-            }
-        }
-
-        /// <summary>
-        ///     Palette of the bitmap.
-        /// </summary>
-        /// <remarks>
-        ///     Derived classes can override this to specify their own value.
-        ///     This implementation simply delegates to the source, if present.
-        /// </remarks>
-        public override BitmapPalette Palette
-        {
-            get
-            {
-                BitmapSource source = Source;
-                if (source != null)
-                {
-                    return source.Palette;
-                }
-                else
-                {
-                    return base.Palette;
-                }
-            }
-        }
-
-        #endregion BitmapSource Properties
-
-        #region BitmapSource Download
-
-        /// <summary>
-        ///     Whether or not the BitmapSource is downloading content.
-        /// </summary>
-        /// <remarks>
-        ///     Derived classes can override this to specify their own value.
-        ///     This implementation simply delegates to the source, if present.
-        /// </remarks>
-        public override bool IsDownloading
-        {
-            get
-            {
-                BitmapSource source = Source;
-                if (source != null)
-                {
-                    return source.IsDownloading;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
-
-        private void OnSourceDownloadCompleted(object sender, EventArgs e)
-        {
-            RaiseDownloadCompleted();
-        }
-
-        private void OnSourceDownloadProgress(object sender, DownloadProgressEventArgs e)
-        {
-            RaiseDownloadProgress(e);
-        }
-
-        private void OnSourceDownloadFailed(object sender, ExceptionEventArgs e)
-        {
-            RaiseDownloadFailed(e);
-        }
-
-        #endregion BitmapSource Download
-
-        #region BitmapSource Decode
-
-        private void OnSourceDecodeFailed(object sender, ExceptionEventArgs e)
-        {
-            RaiseDecodeFailed(e);
-        }
-
-        #endregion BitmapSource Decode
-
-        #region BitmapSource CopyPixels
 
         /// <summary>
         ///     Requests pixels from the ChainedCustomBitmapSource.
@@ -388,39 +282,60 @@ namespace Microsoft.DwayneNeed.Media.Imaging
         /// </remarks>
         protected override void CopyPixelsCore(Int32Rect sourceRect, int stride, int bufferSize, IntPtr buffer)
         {
-            BitmapSource source = Source;
-            BitmapSource convertedSource = source;
+            var source = Source;
+            var convertedSource = source;
 
             if (source != null)
             {
-                PixelFormat sourceFormat = source.Format;
-                PixelFormat destinationFormat = Format;
+                var sourceFormat = source.Format;
+                var destinationFormat = Format;
 
                 if (sourceFormat != destinationFormat)
                 {
                     // We need a format converter.  Reuse the cached one if
                     // it still matches.
-                    if (_formatConverter == null ||
-                        _formatConverter.Source != source ||
-                        _formatConverter.Format != destinationFormat ||
-                        _formatConverterSourceFormat != sourceFormat)
+                    if (formatConverter is null
+                        || formatConverter.Source != source
+                        || formatConverter.Format != destinationFormat
+                        || formatConverterSourceFormat != sourceFormat)
                     {
                         WritePreamble();
-                        _formatConverterSourceFormat = sourceFormat;
-                        _formatConverter = new FormatConvertedBitmap(source, destinationFormat, Palette, 0);
+                        formatConverterSourceFormat = sourceFormat;
+                        formatConverter = new FormatConvertedBitmap(source, destinationFormat, Palette, 0);
                         WritePostscript();
                     }
 
-                    convertedSource = _formatConverter;
+                    convertedSource = formatConverter;
                 }
 
                 convertedSource.CopyPixels(sourceRect, buffer, bufferSize, stride);
             }
         }
 
-        private PixelFormat _formatConverterSourceFormat;
-        private FormatConvertedBitmap _formatConverter;
+        private static void OnSourcePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var chainedBitmap = (ChainedBitmap)d;
+            chainedBitmap.OnSourcePropertyChanged(e);
+        }
 
-        #endregion BitmapSource CopyPixels
+        private void OnSourceDownloadCompleted(object sender, EventArgs e)
+        {
+            RaiseDownloadCompleted();
+        }
+
+        private void OnSourceDownloadProgress(object sender, DownloadProgressEventArgs e)
+        {
+            RaiseDownloadProgress(e);
+        }
+
+        private void OnSourceDownloadFailed(object sender, ExceptionEventArgs e)
+        {
+            RaiseDownloadFailed(e);
+        }
+
+        private void OnSourceDecodeFailed(object sender, ExceptionEventArgs e)
+        {
+            RaiseDecodeFailed(e);
+        }
     }
 }

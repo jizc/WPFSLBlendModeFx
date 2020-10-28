@@ -1,22 +1,19 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Effects;
-
-namespace BlendModeEffectLibrary
+﻿namespace BlendModeEffectLibrary
 {
-	public class NormalEffect : BlendModeEffect
-	{
-		static NormalEffect()
-		{
-			_pixelShader.UriSource = Global.MakePackUri("ShaderSource/NormalEffect.ps");
-		}
+    using System.Windows.Media.Effects;
 
-		public NormalEffect()
-		{
-			this.PixelShader = _pixelShader;
-		}
+    public class NormalEffect : BlendModeEffect
+    {
+        private static readonly PixelShader pixelShader = new PixelShader();
 
-		private static PixelShader _pixelShader = new PixelShader();
-	}
+        static NormalEffect()
+        {
+            pixelShader.UriSource = Global.MakePackUri("ShaderSource/NormalEffect.ps");
+        }
+
+        public NormalEffect()
+        {
+            PixelShader = pixelShader;
+        }
+    }
 }

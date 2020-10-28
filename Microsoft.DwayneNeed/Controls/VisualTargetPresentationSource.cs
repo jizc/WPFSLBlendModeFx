@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Windows;
-using System.Windows.Media;
-
-namespace Microsoft.DwayneNeed.Controls
+﻿namespace Microsoft.DwayneNeed.Controls
 {
+    using System.Windows;
+    using System.Windows.Media;
+
     /// <summary>
     ///     The VisualTargetPresentationSource represents the root
     ///     of a visual subtree owned by a different thread that the
@@ -26,25 +23,23 @@ namespace Microsoft.DwayneNeed.Controls
     /// </remarks>
     public class VisualTargetPresentationSource : PresentationSource
     {
+        private readonly VisualTarget visualTarget;
+
         public VisualTargetPresentationSource(HostVisual hostVisual)
         {
-            _visualTarget = new VisualTarget(hostVisual);
+            visualTarget = new VisualTarget(hostVisual);
         }
 
         public override Visual RootVisual
         {
-            get
-            {
-                return _visualTarget.RootVisual;
-            }
-
+            get => visualTarget.RootVisual;
             set
             {
-                Visual oldRoot = _visualTarget.RootVisual;
+                var oldRoot = visualTarget.RootVisual;
 
                 // Set the root visual of the VisualTarget.  This visual will
                 // now be used to visually compose the scene.
-                _visualTarget.RootVisual = value;
+                visualTarget.RootVisual = value;
 
                 // Tell the PresentationSource that the root visual has
                 // changed.  This kicks off a bunch of stuff like the
@@ -52,30 +47,18 @@ namespace Microsoft.DwayneNeed.Controls
                 RootChanged(oldRoot, value);
 
                 // Kickoff layout...
-                UIElement rootElement = value as UIElement;
-                if (rootElement != null)
+                if (value is UIElement rootElement)
                 {
-                    rootElement.Measure(new Size(Double.PositiveInfinity,
-                                                 Double.PositiveInfinity));
+                    rootElement.Measure(
+                        new Size(double.PositiveInfinity, double.PositiveInfinity));
                     rootElement.Arrange(new Rect(rootElement.DesiredSize));
                 }
             }
         }
 
-        protected override CompositionTarget GetCompositionTargetCore()
-        {
-            return _visualTarget;
-        }
+        // We don't support disposing this object.
+        public override bool IsDisposed => false;
 
-        public override bool IsDisposed
-        {
-            get
-            {
-                // We don't support disposing this object.
-                return false;
-            }
-        }
-
-        private VisualTarget _visualTarget;
+        protected override CompositionTarget GetCompositionTargetCore() => visualTarget;
     }
 }

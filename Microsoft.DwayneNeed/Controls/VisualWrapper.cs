@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Windows.Markup;
-using System.Windows;
-using System.Windows.Media;
-
-namespace Microsoft.DwayneNeed.Controls
+﻿namespace Microsoft.DwayneNeed.Controls
 {
+    using System;
+    using System.Windows;
+    using System.Windows.Markup;
+    using System.Windows.Media;
+
     /// <summary>
     ///     The VisualWrapper simply integrates a raw Visual child into a tree
     ///     of FrameworkElements.
@@ -14,49 +12,37 @@ namespace Microsoft.DwayneNeed.Controls
     [ContentProperty("Child")]
     public class VisualWrapper : FrameworkElement
     {
+        private Visual child;
+
         public Visual Child
         {
-            get
-            {
-                return _child;
-            }
-
+            get => child;
             set
             {
-                if (_child != null)
+                if (child != null)
                 {
-                    RemoveVisualChild(_child);
+                    RemoveVisualChild(child);
                 }
 
-                _child = value;
+                child = value;
 
-                if (_child != null)
+                if (child != null)
                 {
-                    AddVisualChild(_child);
+                    AddVisualChild(child);
                 }
             }
         }
+
+        protected override int VisualChildrenCount => child != null ? 1 : 0;
 
         protected override Visual GetVisualChild(int index)
         {
-            if (_child != null && index == 0)
+            if (child != null && index == 0)
             {
-                return _child;
+                return child;
             }
-            else
-            {
-                throw new ArgumentOutOfRangeException("index");
-            }
-        }
 
-        protected override int VisualChildrenCount
-        {
-            get
-            {
-                return _child != null ? 1 : 0;
-            }
+            throw new ArgumentOutOfRangeException(nameof(index));
         }
-
-        private Visual _child;
     }
 }

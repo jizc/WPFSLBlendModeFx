@@ -1,22 +1,19 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Effects;
-
-namespace BlendModeEffectLibrary
+﻿namespace BlendModeEffectLibrary
 {
-	public class ColorEffect : BlendModeEffect
-	{
-		static ColorEffect()
-		{
-			_pixelShader.UriSource = Global.MakePackUri("ShaderSource/ColorEffect.ps");
-		}
+    using System.Windows.Media.Effects;
 
-		public ColorEffect()
-		{
-			this.PixelShader = _pixelShader;
-		}
+    public class ColorEffect : BlendModeEffect
+    {
+        private static readonly PixelShader pixelShader = new PixelShader();
 
-		private static PixelShader _pixelShader = new PixelShader();
-	}
+        static ColorEffect()
+        {
+            pixelShader.UriSource = Global.MakePackUri("ShaderSource/ColorEffect.ps");
+        }
+
+        public ColorEffect()
+        {
+            PixelShader = pixelShader;
+        }
+    }
 }

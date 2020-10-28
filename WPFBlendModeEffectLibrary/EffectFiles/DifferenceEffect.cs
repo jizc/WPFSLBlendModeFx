@@ -1,22 +1,19 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Effects;
-
-namespace BlendModeEffectLibrary
+﻿namespace BlendModeEffectLibrary
 {
-	public class DifferenceEffect : BlendModeEffect
-	{
-		static DifferenceEffect()
-		{
-			_pixelShader.UriSource = Global.MakePackUri("ShaderSource/DifferenceEffect.ps");
-		}
+    using System.Windows.Media.Effects;
 
-		public DifferenceEffect()
-		{
-			this.PixelShader = _pixelShader;
-		}
+    public class DifferenceEffect : BlendModeEffect
+    {
+        private static readonly PixelShader pixelShader = new PixelShader();
 
-		private static PixelShader _pixelShader = new PixelShader();
-	}
+        static DifferenceEffect()
+        {
+            pixelShader.UriSource = Global.MakePackUri("ShaderSource/DifferenceEffect.ps");
+        }
+
+        public DifferenceEffect()
+        {
+            PixelShader = pixelShader;
+        }
+    }
 }

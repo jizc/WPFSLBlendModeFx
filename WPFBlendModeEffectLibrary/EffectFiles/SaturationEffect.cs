@@ -1,22 +1,19 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Effects;
-
-namespace BlendModeEffectLibrary
+﻿namespace BlendModeEffectLibrary
 {
-	public class SaturationEffect : BlendModeEffect
-	{
-		static SaturationEffect()
-		{
-			_pixelShader.UriSource = Global.MakePackUri("ShaderSource/SaturationEffect.ps");
-		}
+    using System.Windows.Media.Effects;
 
-		public SaturationEffect()
-		{
-			this.PixelShader = _pixelShader;
-		}
+    public class SaturationEffect : BlendModeEffect
+    {
+        private static readonly PixelShader pixelShader = new PixelShader();
 
-		private static PixelShader _pixelShader = new PixelShader();
-	}
+        static SaturationEffect()
+        {
+            pixelShader.UriSource = Global.MakePackUri("ShaderSource/SaturationEffect.ps");
+        }
+
+        public SaturationEffect()
+        {
+            PixelShader = pixelShader;
+        }
+    }
 }

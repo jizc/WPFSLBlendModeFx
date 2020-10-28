@@ -1,22 +1,19 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Effects;
-
-namespace BlendModeEffectLibrary
+﻿namespace BlendModeEffectLibrary
 {
-	public class GlowEffect : BlendModeEffect
-	{
-		static GlowEffect()
-		{
-			_pixelShader.UriSource = Global.MakePackUri("ShaderSource/GlowEffect.ps");
-		}
+    using System.Windows.Media.Effects;
 
-		public GlowEffect()
-		{
-			this.PixelShader = _pixelShader;
-		}
+    public class GlowEffect : BlendModeEffect
+    {
+        private static readonly PixelShader pixelShader = new PixelShader();
 
-		private static PixelShader _pixelShader = new PixelShader();
-	}
+        static GlowEffect()
+        {
+            pixelShader.UriSource = Global.MakePackUri("ShaderSource/GlowEffect.ps");
+        }
+
+        public GlowEffect()
+        {
+            PixelShader = pixelShader;
+        }
+    }
 }

@@ -1,192 +1,200 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using BlendModeEffectLibrary;
-using Microsoft.DwayneNeed.Media.Imaging;
-using System.Windows.Threading;
-using System.Threading;
-
-namespace WPFTestHarness
+﻿namespace WPFTestHarness
 {
-	/// <summary>
-	/// Interaction logic for GradientContoursTestWindow.xaml
-	/// </summary>
-	public partial class GradientContoursTestWindow : Window
-	{
-		public GradientContoursTestWindow()
-		{
-			InitializeComponent();
+    using System.Threading;
+    using System.Windows;
+    using System.Windows.Controls;
+    using System.Windows.Controls.Primitives;
+    using System.Windows.Data;
+    using System.Windows.Media;
+    using System.Windows.Media.Imaging;
+    using System.Windows.Threading;
+    using BlendModeEffectLibrary;
 
-			this.effectsListBox.Items.Add(new NormalEffect());
+    /// <summary>
+    /// Interaction logic for GradientContoursTestWindow.xaml
+    /// </summary>
+    public partial class GradientContoursTestWindow
+    {
+        private bool swapped;
 
-			this.effectsListBox.Items.Add(new DarkenEffect());
-			this.effectsListBox.Items.Add(new MultiplyEffect());
-			this.effectsListBox.Items.Add(new ColorBurnEffect());
-			this.effectsListBox.Items.Add(new LinearBurnEffect());
+        public GradientContoursTestWindow()
+        {
+            InitializeComponent();
 
-			this.effectsListBox.Items.Add(new LightenEffect());
-			this.effectsListBox.Items.Add(new ScreenEffect());
-			this.effectsListBox.Items.Add(new ColorDodgeEffect());
-			this.effectsListBox.Items.Add(new LinearDodgeEffect());
+            effectsListBox.Items.Add(new NormalEffect());
 
-			this.effectsListBox.Items.Add(new OverlayEffect());
-			this.effectsListBox.Items.Add(new SoftLightEffect());
-			this.effectsListBox.Items.Add(new HardLightEffect());
-			this.effectsListBox.Items.Add(new VividLightEffect());
-			this.effectsListBox.Items.Add(new LinearLightEffect());
-			this.effectsListBox.Items.Add(new PinLightEffect());
+            effectsListBox.Items.Add(new DarkenEffect());
+            effectsListBox.Items.Add(new MultiplyEffect());
+            effectsListBox.Items.Add(new ColorBurnEffect());
+            effectsListBox.Items.Add(new LinearBurnEffect());
 
-			this.effectsListBox.Items.Add(new DifferenceEffect());
-			this.effectsListBox.Items.Add(new ExclusionEffect());
+            effectsListBox.Items.Add(new LightenEffect());
+            effectsListBox.Items.Add(new ScreenEffect());
+            effectsListBox.Items.Add(new ColorDodgeEffect());
+            effectsListBox.Items.Add(new LinearDodgeEffect());
 
-			this.effectsListBox.Items.Add(new GlowEffect());
-			this.effectsListBox.Items.Add(new ReflectEffect());
+            effectsListBox.Items.Add(new OverlayEffect());
+            effectsListBox.Items.Add(new SoftLightEffect());
+            effectsListBox.Items.Add(new HardLightEffect());
+            effectsListBox.Items.Add(new VividLightEffect());
+            effectsListBox.Items.Add(new LinearLightEffect());
+            effectsListBox.Items.Add(new PinLightEffect());
 
-			this.effectsListBox.Items.Add(new HardMixEffect());
-			this.effectsListBox.Items.Add(new NegationEffect());
-			this.effectsListBox.Items.Add(new PhoenixEffect());
+            effectsListBox.Items.Add(new DifferenceEffect());
+            effectsListBox.Items.Add(new ExclusionEffect());
 
-			this.effectsListBox.Items.Add(new AverageEffect());
+            effectsListBox.Items.Add(new GlowEffect());
+            effectsListBox.Items.Add(new ReflectEffect());
 
-			this.effectsListBox.Items.Add(new HueEffect());
-			this.effectsListBox.Items.Add(new SaturationEffect());
-			this.effectsListBox.Items.Add(new ColorEffect());
-			this.effectsListBox.Items.Add(new LuminosityEffect());
+            effectsListBox.Items.Add(new HardMixEffect());
+            effectsListBox.Items.Add(new NegationEffect());
+            effectsListBox.Items.Add(new PhoenixEffect());
 
-			this.effectsListBox.SelectedIndex = 0;
+            effectsListBox.Items.Add(new AverageEffect());
 
-			Brush brushA = (Brush)this.Resources["whiteToBlackTopToBottomGradientBrushOpacityBound"];
-			Binding bindingA = new Binding();
-			bindingA.Source = brushA;
-			bindingA.Path = new PropertyPath("Opacity");
-			this.aOpacitySlider.SetBinding(Slider.ValueProperty, bindingA);
+            effectsListBox.Items.Add(new HueEffect());
+            effectsListBox.Items.Add(new SaturationEffect());
+            effectsListBox.Items.Add(new ColorEffect());
+            effectsListBox.Items.Add(new LuminosityEffect());
 
-			Brush brushB = (Brush)this.Resources["blackToWhiteLeftToRightGradientBrushOpacityBound"];
-			Binding bindingB = new Binding();
-			bindingB.Source = brushB;
-			bindingB.Path = new PropertyPath("Opacity");
-			this.bOpacitySlider.SetBinding(Slider.ValueProperty, bindingB);
+            effectsListBox.SelectedIndex = 0;
 
-			this.Loaded += (sender, e) => ShowGrayscaleBitmap();
-		}
+            var brushA = (Brush)Resources["whiteToBlackTopToBottomGradientBrushOpacityBound"];
+            var bindingA = new Binding
+            {
+                Source = brushA,
+                Path = new PropertyPath(nameof(Opacity))
+            };
+            aOpacitySlider.SetBinding(RangeBase.ValueProperty, bindingA);
+
+            var brushB = (Brush)Resources["blackToWhiteLeftToRightGradientBrushOpacityBound"];
+            var bindingB = new Binding
+            {
+                Source = brushB,
+                Path = new PropertyPath(nameof(Opacity))
+            };
+            bOpacitySlider.SetBinding(RangeBase.ValueProperty, bindingB);
+
+            Loaded += (sender, e) => ShowGrayscaleBitmap();
+        }
+
+        private static BitmapSource CaptureScreen(Visual target, double dpiX, double dpiY)
+        {
+            if (target is null)
+            {
+                return null;
+            }
+
+            var bounds = VisualTreeHelper.GetDescendantBounds(target);
+            if (bounds.IsEmpty)
+            {
+                return null;
+            }
+
+            var rtb = new RenderTargetBitmap(
+                (int)(bounds.Width * dpiX / 96.0),
+                (int)(bounds.Height * dpiY / 96.0),
+                dpiX,
+                dpiY,
+                PixelFormats.Pbgra32);
+
+            var dv = new DrawingVisual();
+            using (var ctx = dv.RenderOpen())
+            {
+                var vb = new VisualBrush(target);
+                ctx.DrawRectangle(vb, null, new Rect(new Point(), bounds.Size));
+            }
+
+            rtb.Render(dv);
+
+            return rtb;
+        }
 
 
-		private void effectsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-		{
-			BlendModeEffect effect = e.AddedItems[0] as BlendModeEffect;
-			if (effect != null)
-			{
-				effect.BInput = (ImageBrush)this.Resources["imageBrushTexture"];
-				this.resultBorder.Effect = effect;
+        private void effectsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.AddedItems[0] is BlendModeEffect effect)
+            {
+                effect.BInput = (ImageBrush)Resources["imageBrushTexture"];
+                resultBorder.Effect = effect;
 
-				ShowGrayscaleBitmap();
-			}
-		}
+                ShowGrayscaleBitmap();
+            }
+        }
 
-		private void ShowGrayscaleBitmap()
-		{
-			BitmapSource captureScreen = CaptureScreen(this.resultBorder, 96, 96);
-			if (captureScreen == null)
-				return;
+        private void ShowGrayscaleBitmap()
+        {
+            var captureScreen = CaptureScreen(resultBorder, 96, 96);
+            if (captureScreen is null)
+            {
+                return;
+            }
 
-			Grayscale4Bitmap grayscaleBitmap = new Grayscale4Bitmap();
-			grayscaleBitmap.Source = captureScreen;
-			this.resultImage.Source = grayscaleBitmap;
-		}
+            var grayscaleBitmap = new Grayscale4Bitmap { Source = captureScreen };
+            resultImage.Source = grayscaleBitmap;
+        }
 
-		private static BitmapSource CaptureScreen(Visual target, double dpiX, double dpiY)
-		{
-			if (target == null)
-				return null;
+        private void opacitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            Dispatcher.BeginInvoke(DispatcherPriority.Loaded, (ThreadStart)(ShowGrayscaleBitmap));
+        }
 
-			Rect bounds = VisualTreeHelper.GetDescendantBounds(target);
-			if (bounds.IsEmpty)
-				return null;
+        private void swap_Click(object sender, RoutedEventArgs e)
+        {
+            if (!swapped)
+            {
+                aLabel.Text = "B";
+                aBorder.Fill = (Brush)Resources["blackToWhiteLeftToRightGradientBrush"];
+                bLabel.Text = "A";
+                bBorder.Fill = (Brush)Resources["whiteToBlackTopToBottomGradientBrush"];
 
-			RenderTargetBitmap rtb =
-				new RenderTargetBitmap
-				(
-					(int)(bounds.Width * dpiX / 96.0),
-					(int)(bounds.Height * dpiY / 96.0),
-					dpiX,
-					dpiY,
-					PixelFormats.Pbgra32
-				);
+                var brushA = (Brush)Resources["blackToWhiteLeftToRightGradientBrushOpacityBound"];
+                var bindingA = new Binding
+                {
+                    Source = brushA,
+                    Path = new PropertyPath(nameof(Opacity))
+                };
+                aOpacitySlider.SetBinding(RangeBase.ValueProperty, bindingA);
+                resultBorder.Fill = brushA;
 
-			DrawingVisual dv = new DrawingVisual();
-			using (DrawingContext ctx = dv.RenderOpen())
-			{
-				VisualBrush vb = new VisualBrush(target);
-				ctx.DrawRectangle(vb, null, new Rect(new Point(), bounds.Size));
-			}
-			rtb.Render(dv);
+                var brushB = (Brush)Resources["whiteToBlackTopToBottomGradientBrushOpacityBound"];
+                var bindingB = new Binding
+                {
+                    Source = brushB,
+                    Path = new PropertyPath(nameof(Opacity))
+                };
+                bOpacitySlider.SetBinding(RangeBase.ValueProperty, bindingB);
+                ((GeometryDrawing)Resources["geometryDrawing"]).Brush = brushB;
+            }
+            else
+            {
+                aLabel.Text = "A";
+                aBorder.Fill = resultBorder.Fill = (Brush)Resources["whiteToBlackTopToBottomGradientBrush"];
+                bLabel.Text = "B";
+                bBorder.Fill = (Brush)Resources["blackToWhiteLeftToRightGradientBrush"];
 
-			return rtb;
-		}
+                var brushA = (Brush)Resources["whiteToBlackTopToBottomGradientBrushOpacityBound"];
+                var bindingA = new Binding
+                {
+                    Source = brushA,
+                    Path = new PropertyPath(nameof(Opacity))
+                };
+                aOpacitySlider.SetBinding(RangeBase.ValueProperty, bindingA);
+                resultBorder.Fill = brushA;
 
-		private void opacitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-		{
-			Dispatcher.BeginInvoke(DispatcherPriority.Loaded, (ThreadStart)(() => ShowGrayscaleBitmap()));
-		}
+                var brushB = (Brush)Resources["blackToWhiteLeftToRightGradientBrushOpacityBound"];
+                var bindingB = new Binding
+                {
+                    Source = brushB,
+                    Path = new PropertyPath(nameof(Opacity))
+                };
+                bOpacitySlider.SetBinding(RangeBase.ValueProperty, bindingB);
+                ((GeometryDrawing)Resources["geometryDrawing"]).Brush = brushB;
+            }
 
-		private void swap_Click(object sender, RoutedEventArgs e)
-		{
-			if (!swapped)
-			{
-				aLabel.Text = "B";
-				aBorder.Fill = (Brush)this.Resources["blackToWhiteLeftToRightGradientBrush"];
-				bLabel.Text = "A";
-				bBorder.Fill = (Brush)this.Resources["whiteToBlackTopToBottomGradientBrush"];
+            Dispatcher.BeginInvoke(DispatcherPriority.Loaded, (ThreadStart)(ShowGrayscaleBitmap));
 
-				Brush brushA = (Brush)this.Resources["blackToWhiteLeftToRightGradientBrushOpacityBound"];
-				Binding bindingA = new Binding();
-				bindingA.Source = brushA;
-				bindingA.Path = new PropertyPath("Opacity");
-				this.aOpacitySlider.SetBinding(Slider.ValueProperty, bindingA);
-				resultBorder.Fill = brushA;
-
-				Brush brushB = (Brush)this.Resources["whiteToBlackTopToBottomGradientBrushOpacityBound"];
-				Binding bindingB = new Binding();
-				bindingB.Source = brushB;
-				bindingB.Path = new PropertyPath("Opacity");
-				this.bOpacitySlider.SetBinding(Slider.ValueProperty, bindingB);
-				((GeometryDrawing)this.Resources["geometryDrawing"]).Brush = brushB;
-			}
-			else
-			{
-				aLabel.Text = "A";
-				aBorder.Fill = resultBorder.Fill = (Brush)this.Resources["whiteToBlackTopToBottomGradientBrush"];
-				bLabel.Text = "B";
-				bBorder.Fill = (Brush)this.Resources["blackToWhiteLeftToRightGradientBrush"];
-
-				Brush brushA = (Brush)this.Resources["whiteToBlackTopToBottomGradientBrushOpacityBound"];
-				Binding bindingA = new Binding();
-				bindingA.Source = brushA;
-				bindingA.Path = new PropertyPath("Opacity");
-				this.aOpacitySlider.SetBinding(Slider.ValueProperty, bindingA);
-				resultBorder.Fill = brushA;
-
-				Brush brushB = (Brush)this.Resources["blackToWhiteLeftToRightGradientBrushOpacityBound"];
-				Binding bindingB = new Binding();
-				bindingB.Source = brushB;
-				bindingB.Path = new PropertyPath("Opacity");
-				this.bOpacitySlider.SetBinding(Slider.ValueProperty, bindingB);
-				((GeometryDrawing)this.Resources["geometryDrawing"]).Brush = brushB;
-			}
-
-			Dispatcher.BeginInvoke(DispatcherPriority.Loaded, (ThreadStart)(() => ShowGrayscaleBitmap()));
-
-			swapped = !swapped;
-		}
-		private bool swapped = false;
-	}
+            swapped = !swapped;
+        }
+    }
 }

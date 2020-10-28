@@ -1,22 +1,19 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Effects;
-
-namespace BlendModeEffectLibrary
+﻿namespace BlendModeEffectLibrary
 {
-	public class LuminosityEffect : BlendModeEffect
-	{
-		static LuminosityEffect()
-		{
-			_pixelShader.UriSource = Global.MakePackUri("ShaderSource/LuminosityEffect.ps");
-		}
+    using System.Windows.Media.Effects;
 
-		public LuminosityEffect()
-		{
-			this.PixelShader = _pixelShader;
-		}
+    public class LuminosityEffect : BlendModeEffect
+    {
+        private static readonly PixelShader pixelShader = new PixelShader();
 
-		private static PixelShader _pixelShader = new PixelShader();
-	}
+        static LuminosityEffect()
+        {
+            pixelShader.UriSource = Global.MakePackUri("ShaderSource/LuminosityEffect.ps");
+        }
+
+        public LuminosityEffect()
+        {
+            PixelShader = pixelShader;
+        }
+    }
 }

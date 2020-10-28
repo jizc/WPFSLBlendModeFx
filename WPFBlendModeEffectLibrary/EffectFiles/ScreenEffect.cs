@@ -1,22 +1,19 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Effects;
-
-namespace BlendModeEffectLibrary
+﻿namespace BlendModeEffectLibrary
 {
-	public class ScreenEffect : BlendModeEffect
-	{
-		static ScreenEffect()
-		{
-			_pixelShader.UriSource = Global.MakePackUri("ShaderSource/ScreenEffect.ps");
-		}
+    using System.Windows.Media.Effects;
 
-		public ScreenEffect()
-		{
-			this.PixelShader = _pixelShader;
-		}
+    public class ScreenEffect : BlendModeEffect
+    {
+        private static readonly PixelShader pixelShader = new PixelShader();
 
-		private static PixelShader _pixelShader = new PixelShader();
-	}
+        static ScreenEffect()
+        {
+            pixelShader.UriSource = Global.MakePackUri("ShaderSource/ScreenEffect.ps");
+        }
+
+        public ScreenEffect()
+        {
+            PixelShader = pixelShader;
+        }
+    }
 }

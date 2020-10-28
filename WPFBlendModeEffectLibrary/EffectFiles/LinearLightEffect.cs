@@ -1,22 +1,19 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Effects;
-
-namespace BlendModeEffectLibrary
+﻿namespace BlendModeEffectLibrary
 {
-	public class LinearLightEffect : BlendModeEffect
-	{
-		static LinearLightEffect()
-		{
-			_pixelShader.UriSource = Global.MakePackUri("ShaderSource/LinearLightEffect.ps");
-		}
+    using System.Windows.Media.Effects;
 
-		public LinearLightEffect()
-		{
-			this.PixelShader = _pixelShader;
-		}
+    public class LinearLightEffect : BlendModeEffect
+    {
+        private static readonly PixelShader pixelShader = new PixelShader();
 
-		private static PixelShader _pixelShader = new PixelShader();
-	}
+        static LinearLightEffect()
+        {
+            pixelShader.UriSource = Global.MakePackUri("ShaderSource/LinearLightEffect.ps");
+        }
+
+        public LinearLightEffect()
+        {
+            PixelShader = pixelShader;
+        }
+    }
 }

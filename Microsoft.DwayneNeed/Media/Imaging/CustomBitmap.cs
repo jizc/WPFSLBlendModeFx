@@ -1,154 +1,69 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Runtime.InteropServices;
-
-namespace Microsoft.DwayneNeed.Media.Imaging
+﻿namespace Microsoft.DwayneNeed.Media.Imaging
 {
+    using System;
+    using System.Runtime.InteropServices;
+    using System.Windows;
+    using System.Windows.Media;
+    using System.Windows.Media.Imaging;
+
     public class CustomBitmap : BitmapSource
     {
-        #region Freezable
+        private EventHandler downloadCompleted;
+        private EventHandler<DownloadProgressEventArgs> downloadProgress;
+        private EventHandler<ExceptionEventArgs> downloadFailed;
+        private EventHandler<ExceptionEventArgs> decodeFailed;
 
         /// <summary>
-        ///     Creates an instance of a CustomBitmap.
+        ///     Raised when the downloading of content is completed.
         /// </summary>
-        /// <returns>
-        ///     The new instance.
-        /// </returns>
         /// <remarks>
-        ///     The default implementation uses reflection to create a new
-        ///     instance of this type.  Derived classes may override this
-        ///     method if they wish to provide a more performant
-        ///     implementation, or if their type does not have a public
-        ///     default constructor.
+        ///     This is not applicable to all CustomBitmap classes, so
+        ///     the base implementation does nothing.
         /// </remarks>
-        protected override Freezable CreateInstanceCore()
+        public override event EventHandler DownloadCompleted
         {
-            return (Freezable)Activator.CreateInstance(this.GetType());
+            add => downloadCompleted += value;
+            remove => downloadCompleted -= value;
         }
 
         /// <summary>
-        ///     Copies data into a cloned instance.
+        ///     Raised when the downloading of content has progressed.
         /// </summary>
-        /// <param name="source">
-        ///     The original instance to copy data from.
-        /// </param>
         /// <remarks>
-        ///     When Freezable is cloned, WPF will make deep clones of all
-        ///     writable, locally-set properties including expressions. The
-        ///     property's base value is copied -- not the current value. WPF
-        ///     skips read only DPs.
-        ///     
-        ///     If you derive from this class and have additional non-DP state
-        ///     that should be transfered to copies, you should override the
-        ///     CopyCommon method.
+        ///     This is not applicable to all CustomBitmap classes, so
+        ///     the base implementation does nothing.
         /// </remarks>
-        protected sealed override void CloneCore(Freezable source)
+        public override event EventHandler<DownloadProgressEventArgs> DownloadProgress
         {
-            base.CloneCore(source);
-
-            CustomBitmap customBitmapSource = (CustomBitmap)source;
-            CopyCore(customBitmapSource, /*useCurrentValue*/ false, /*willBeFrozen*/ false);
+            add => downloadProgress += value;
+            remove => downloadProgress -= value;
         }
 
         /// <summary>
-        ///     Copies data into a cloned instance.
+        ///     Raised when the downloading of content has failed.
         /// </summary>
-        /// <param name="source">
-        ///     The original instance to copy data from.
-        /// </param>
         /// <remarks>
-        ///     When a Freezable's "current value" is cloned, WPF will make
-        ///     deep clones of the "current values" of all writable,
-        ///     locally-set properties. This has the effect of resolving
-        ///     expressions to their values. WPF skips read only DPs.
-        ///     
-        ///     If you derive from this class and have additional non-DP state
-        ///     that should be transfered to copies, you should override the
-        ///     CopyCommon method.
+        ///     This is not applicable to all CustomBitmap classes, so
+        ///     the base implementation throws.
         /// </remarks>
-        protected sealed override void CloneCurrentValueCore(Freezable source)
+        public override event EventHandler<ExceptionEventArgs> DownloadFailed
         {
-            base.CloneCurrentValueCore(source);
-
-            CustomBitmap customBitmapSource = (CustomBitmap)source;
-            CopyCore(customBitmapSource, /*useCurrentValue*/ true, /*willBeFrozen*/ false);
+            add => downloadFailed += value;
+            remove => downloadFailed -= value;
         }
 
         /// <summary>
-        ///     Copies data into a cloned instance.
+        ///     Raised when the downloading of content has progressed.
         /// </summary>
-        /// <param name="source">
-        ///     The original instance to copy data from.
-        /// </param>
         /// <remarks>
-        ///     Freezable.GetAsFrozen is semantically equivalent to
-        ///     Freezable.Clone().Freeze(), except that you can avoid copying
-        ///     any portions of the Freezable graph which are already frozen.
-        ///     
-        ///     If you derive from this class and have additional non-DP state
-        ///     that should be transfered to copies, you should override the
-        ///     CopyCommon method.
+        ///     This is not applicable to all CustomBitmap classes, so
+        ///     the base implementation does nothing.
         /// </remarks>
-        protected sealed override void GetAsFrozenCore(Freezable source)
+        public override event EventHandler<ExceptionEventArgs> DecodeFailed
         {
-            base.GetAsFrozenCore(source);
-
-            CustomBitmap customBitmapSource = (CustomBitmap)source;
-            CopyCore(customBitmapSource, /*useCurrentValue*/ false, /*willBeFrozen*/ true);
+            add => decodeFailed += value;
+            remove => decodeFailed -= value;
         }
-
-        /// <summary>
-        ///     Copies data into a cloned instance.
-        /// </summary>
-        /// <param name="source">
-        ///     The original instance to copy data from.
-        /// </param>
-        /// <remarks>
-        ///     Freezable.GetCurrentValueAsFrozen is semantically equivalent to
-        ///     Freezable.CloneCurrentValue().Freeze(), except that WPF will
-        ///     avoid copying any portions of the Freezable graph which are
-        ///     already frozen.
-        ///     
-        ///     If you derive from this class and have additional non-DP state
-        ///     that should be transfered to copies, you should override the
-        ///     CopyCommon method.
-        /// </remarks>
-        protected sealed override void GetCurrentValueAsFrozenCore(Freezable source)
-        {
-            base.GetCurrentValueAsFrozenCore(source);
-
-            CustomBitmap customBitmapSource = (CustomBitmap)source;
-            CopyCore(customBitmapSource, /*useCurrentValue*/ true, /*willBeFrozen*/ true);
-        }
-
-        /// <summary>
-        ///     Copies data into a cloned instance.
-        /// </summary>
-        /// <param name="original">
-        ///     The original instance to copy data from.
-        /// </param>
-        /// <param name="useCurrentValue">
-        ///     Whether or not to copy the current value of expressions, or the
-        ///     expressions themselves.
-        /// </param>
-        /// <param name="willBeFrozen">
-        ///     Indicates whether or not the clone will be frozen.  If the
-        ///     clone will be immediately frozen, there is no need to clone
-        ///     data that is already frozen, you can just share the instance.
-        /// </param>
-        /// <remarks>
-        ///     Override this method if you have additional non-DP state that
-        ///     should be transfered to clones.
-        /// </remarks>
-        protected virtual void CopyCore(CustomBitmap original, bool useCurrentValue, bool willBeFrozen)
-        {
-        }
-
-        #endregion Freezable
-
-        #region BitmapSource Properties
 
         /// <summary>
         ///     Horizontal DPI of the bitmap.
@@ -156,13 +71,7 @@ namespace Microsoft.DwayneNeed.Media.Imaging
         /// <remarks>
         ///     Derived classes can override this to specify their own value.
         /// </remarks>
-        public override double DpiX
-        {
-            get
-            {
-                return 96.0;
-            }
-        }
+        public override double DpiX => 96.0;
 
         /// <summary>
         ///     Vertical DPI of the bitmap.
@@ -170,13 +79,7 @@ namespace Microsoft.DwayneNeed.Media.Imaging
         /// <remarks>
         ///     Derived classes can override this to specify their own value.
         /// </remarks>
-        public override double DpiY
-        {
-            get
-            {
-                return (double)96.0;
-            }
-        }
+        public override double DpiY => 96.0;
 
         /// <summary>
         ///     Pixel format of the bitmap.
@@ -184,13 +87,7 @@ namespace Microsoft.DwayneNeed.Media.Imaging
         /// <remarks>
         ///     Derived classes can override this to specify their own value.
         /// </remarks>
-        public override PixelFormat Format
-        {
-            get
-            {
-                return PixelFormats.Bgr32;
-            }
-        }
+        public override PixelFormat Format => PixelFormats.Bgr32;
 
         /// <summary>
         ///     Width of the bitmap contents.
@@ -198,13 +95,7 @@ namespace Microsoft.DwayneNeed.Media.Imaging
         /// <remarks>
         ///     Derived classes can override this to specify their own value.
         /// </remarks>
-        public override int PixelWidth
-        {
-            get
-            {
-                return 0;
-            }
-        }
+        public override int PixelWidth => 0;
 
         /// <summary>
         ///     Height of the bitmap contents.
@@ -212,13 +103,7 @@ namespace Microsoft.DwayneNeed.Media.Imaging
         /// <remarks>
         ///     Derived classes can override this to specify their own value.
         /// </remarks>
-        public override int PixelHeight
-        {
-            get
-            {
-                return 0;
-            }
-        }
+        public override int PixelHeight => 0;
 
         /// <summary>
         ///     Palette of the bitmap.
@@ -226,17 +111,16 @@ namespace Microsoft.DwayneNeed.Media.Imaging
         /// <remarks>
         ///     Derived classes can override this to specify their own value.
         /// </remarks>
-        public override BitmapPalette Palette
-        {
-            get
-            {
-                return null;
-            }
-        }
+        public override BitmapPalette Palette => null;
 
-        #endregion BitmapSource Properties
-
-        #region BitmapSource CopyPixels
+        /// <summary>
+        ///     Whether or not the BitmapSource is downloading content.
+        /// </summary>
+        /// <remarks>
+        ///     This is not applicable to all CustomBitmap classes, so
+        ///     the base implementation return false.
+        /// </remarks>
+        public override bool IsDownloading => false;
 
         /// <summary>
         ///     Requests pixels from this BitmapSource.
@@ -256,7 +140,7 @@ namespace Microsoft.DwayneNeed.Media.Imaging
         /// </remarks>
         public sealed override void CopyPixels(Array pixels, int stride, int offset)
         {
-            Int32Rect sourceRect = new Int32Rect(0, 0, PixelWidth, PixelHeight);
+            var sourceRect = new Int32Rect(0, 0, PixelWidth, PixelHeight);
             CopyPixels(sourceRect, pixels, stride, offset);
         }
 
@@ -281,37 +165,34 @@ namespace Microsoft.DwayneNeed.Media.Imaging
         /// </remarks>
         public sealed override void CopyPixels(Int32Rect sourceRect, Array pixels, int stride, int offset)
         {
-            int elementSize;
-            int bufferSize;
-            Type elementType;
-            ValidateArrayAndGetInfo(pixels, out elementSize, out bufferSize, out elementType);
+            ValidateArrayAndGetInfo(pixels, out var elementSize, out var bufferSize, out var elementType);
 
             if (offset < 0)
             {
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
 
             // We accept arrays of arbitrary value types - but not reference types.
-            if (elementType == null || !elementType.IsValueType)
+            if (elementType is null || !elementType.IsValueType)
             {
-                throw new ArgumentException("pixels");
+                throw new ArgumentException(nameof(pixels));
             }
 
             checked
             {
-                int offsetInBytes = offset * elementSize;
+                var offsetInBytes = offset * elementSize;
                 if (offsetInBytes >= bufferSize)
                 {
                     throw new IndexOutOfRangeException();
                 }
 
                 // Get the address of the data in the array by pinning it.
-                GCHandle arrayHandle = GCHandle.Alloc(pixels, GCHandleType.Pinned);
+                var arrayHandle = GCHandle.Alloc(pixels, GCHandleType.Pinned);
                 try
                 {
                     // Adjust the buffer and bufferSize to account for the offset.
-                    IntPtr buffer = arrayHandle.AddrOfPinnedObject();
-                    buffer = new IntPtr(((long)buffer) + (long)offsetInBytes);
+                    var buffer = arrayHandle.AddrOfPinnedObject();
+                    buffer = new IntPtr((long)buffer + offsetInBytes);
                     bufferSize -= offsetInBytes;
 
                     CopyPixels(sourceRect, buffer, bufferSize, stride);
@@ -355,62 +236,62 @@ namespace Microsoft.DwayneNeed.Media.Imaging
 
             if (sourceRect.X < 0)
             {
-                throw new ArgumentOutOfRangeException("sourceRect");
+                throw new ArgumentOutOfRangeException(nameof(sourceRect));
             }
 
             if (sourceRect.Width < 0)
             {
-                throw new ArgumentOutOfRangeException("sourceRect");
+                throw new ArgumentOutOfRangeException(nameof(sourceRect));
             }
 
             if ((sourceRect.X + sourceRect.Width) > PixelWidth)
             {
-                throw new ArgumentOutOfRangeException("sourceRect");
+                throw new ArgumentOutOfRangeException(nameof(sourceRect));
             }
 
             if (sourceRect.Y < 0)
             {
-                throw new ArgumentOutOfRangeException("sourceRect");
+                throw new ArgumentOutOfRangeException(nameof(sourceRect));
             }
 
             if (sourceRect.Height < 0)
             {
-                throw new ArgumentOutOfRangeException("sourceRect");
+                throw new ArgumentOutOfRangeException(nameof(sourceRect));
             }
 
             if ((sourceRect.Y + sourceRect.Height) > PixelHeight)
             {
-                throw new ArgumentOutOfRangeException("sourceRect");
+                throw new ArgumentOutOfRangeException(nameof(sourceRect));
             }
 
             if (buffer == IntPtr.Zero)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
 
             checked
             {
                 if (stride < 1)
                 {
-                    throw new ArgumentOutOfRangeException("stride");
+                    throw new ArgumentOutOfRangeException(nameof(stride));
                 }
 
-                uint minStrideInBits = (uint)(sourceRect.Width * Format.BitsPerPixel);
-                uint minStrideInBytes = ((minStrideInBits + 7) / 8);
+                var minStrideInBits = (uint)(sourceRect.Width * Format.BitsPerPixel);
+                var minStrideInBytes = ((minStrideInBits + 7) / 8);
                 if (stride < minStrideInBytes)
                 {
-                    throw new ArgumentOutOfRangeException("stride");
+                    throw new ArgumentOutOfRangeException(nameof(stride));
                 }
 
                 if (bufferSize < 1)
                 {
-                    throw new ArgumentOutOfRangeException("bufferSize");
+                    throw new ArgumentOutOfRangeException(nameof(bufferSize));
                 }
 
-                uint minBufferSize = (uint)((sourceRect.Height - 1) * stride) + minStrideInBytes;
+                var minBufferSize = (uint)((sourceRect.Height - 1) * stride) + minStrideInBytes;
                 if (bufferSize < minBufferSize)
                 {
-                    throw new ArgumentOutOfRangeException("bufferSize");
+                    throw new ArgumentOutOfRangeException(nameof(bufferSize));
                 }
             }
 
@@ -418,9 +299,145 @@ namespace Microsoft.DwayneNeed.Media.Imaging
         }
 
         /// <summary>
+        ///     Creates an instance of a CustomBitmap.
+        /// </summary>
+        /// <returns>
+        ///     The new instance.
+        /// </returns>
+        /// <remarks>
+        ///     The default implementation uses reflection to create a new
+        ///     instance of this type.  Derived classes may override this
+        ///     method if they wish to provide a more performant
+        ///     implementation, or if their type does not have a public
+        ///     default constructor.
+        /// </remarks>
+        protected override Freezable CreateInstanceCore()
+        {
+            return (Freezable)Activator.CreateInstance(GetType());
+        }
+
+        /// <summary>
+        ///     Copies data into a cloned instance.
+        /// </summary>
+        /// <param name="source">
+        ///     The original instance to copy data from.
+        /// </param>
+        /// <remarks>
+        ///     When Freezable is cloned, WPF will make deep clones of all
+        ///     writable, locally-set properties including expressions. The
+        ///     property's base value is copied -- not the current value. WPF
+        ///     skips read only DPs.
+        ///     
+        ///     If you derive from this class and have additional non-DP state
+        ///     that should be transfered to copies, you should override the
+        ///     CopyCommon method.
+        /// </remarks>
+        protected sealed override void CloneCore(Freezable source)
+        {
+            base.CloneCore(source);
+
+            var customBitmapSource = (CustomBitmap)source;
+            CopyCore(customBitmapSource, /*useCurrentValue*/ false, /*willBeFrozen*/ false);
+        }
+
+        /// <summary>
+        ///     Copies data into a cloned instance.
+        /// </summary>
+        /// <param name="source">
+        ///     The original instance to copy data from.
+        /// </param>
+        /// <remarks>
+        ///     When a Freezable's "current value" is cloned, WPF will make
+        ///     deep clones of the "current values" of all writable,
+        ///     locally-set properties. This has the effect of resolving
+        ///     expressions to their values. WPF skips read only DPs.
+        ///     
+        ///     If you derive from this class and have additional non-DP state
+        ///     that should be transferred to copies, you should override the
+        ///     CopyCommon method.
+        /// </remarks>
+        protected sealed override void CloneCurrentValueCore(Freezable source)
+        {
+            base.CloneCurrentValueCore(source);
+
+            var customBitmapSource = (CustomBitmap)source;
+            CopyCore(customBitmapSource, /*useCurrentValue*/ true, /*willBeFrozen*/ false);
+        }
+
+        /// <summary>
+        ///     Copies data into a cloned instance.
+        /// </summary>
+        /// <param name="source">
+        ///     The original instance to copy data from.
+        /// </param>
+        /// <remarks>
+        ///     Freezable.GetAsFrozen is semantically equivalent to
+        ///     Freezable.Clone().Freeze(), except that you can avoid copying
+        ///     any portions of the Freezable graph which are already frozen.
+        ///     
+        ///     If you derive from this class and have additional non-DP state
+        ///     that should be transferred to copies, you should override the
+        ///     CopyCommon method.
+        /// </remarks>
+        protected sealed override void GetAsFrozenCore(Freezable source)
+        {
+            base.GetAsFrozenCore(source);
+
+            var customBitmapSource = (CustomBitmap)source;
+            CopyCore(customBitmapSource, /*useCurrentValue*/ false, /*willBeFrozen*/ true);
+        }
+
+        /// <summary>
+        ///     Copies data into a cloned instance.
+        /// </summary>
+        /// <param name="source">
+        ///     The original instance to copy data from.
+        /// </param>
+        /// <remarks>
+        ///     Freezable.GetCurrentValueAsFrozen is semantically equivalent to
+        ///     Freezable.CloneCurrentValue().Freeze(), except that WPF will
+        ///     avoid copying any portions of the Freezable graph which are
+        ///     already frozen.
+        ///     
+        ///     If you derive from this class and have additional non-DP state
+        ///     that should be transfered to copies, you should override the
+        ///     CopyCommon method.
+        /// </remarks>
+        protected sealed override void GetCurrentValueAsFrozenCore(Freezable source)
+        {
+            base.GetCurrentValueAsFrozenCore(source);
+
+            var customBitmapSource = (CustomBitmap)source;
+            CopyCore(customBitmapSource, /*useCurrentValue*/ true, /*willBeFrozen*/ true);
+        }
+
+        /// <summary>
+        ///     Copies data into a cloned instance.
+        /// </summary>
+        /// <param name="original">
+        ///     The original instance to copy data from.
+        /// </param>
+        /// <param name="useCurrentValue">
+        ///     Whether or not to copy the current value of expressions, or the
+        ///     expressions themselves.
+        /// </param>
+        /// <param name="willBeFrozen">
+        ///     Indicates whether or not the clone will be frozen.  If the
+        ///     clone will be immediately frozen, there is no need to clone
+        ///     data that is already frozen, you can just share the instance.
+        /// </param>
+        /// <remarks>
+        ///     Override this method if you have additional non-DP state that
+        ///     should be transferred to clones.
+        /// </remarks>
+        protected virtual void CopyCore(CustomBitmap original, bool useCurrentValue, bool willBeFrozen)
+        {
+        }
+
+        /// <summary>
         ///     Requests pixels from this BitmapSource.
         /// </summary>
-        /// <param name="rc">
+        /// <param name="sourceRect">
         ///     The caller can restrict the operation to a rectangle of
         ///     interest (ROI) using this parameter. The ROI sub-rectangle
         ///     must be fully contained in the bounds of the bitmap.
@@ -460,6 +477,41 @@ namespace Microsoft.DwayneNeed.Media.Imaging
         }
 
         /// <summary>
+        ///     Raises the download completed event.
+        /// </summary>
+        protected void RaiseDownloadCompleted()
+        {
+            downloadCompleted?.Invoke(this, EventArgs.Empty);
+        }
+
+        /// <summary>
+        ///     Raises the download progress event.
+        /// </summary>
+        /// <param name="e"></param>
+        protected void RaiseDownloadProgress(DownloadProgressEventArgs e)
+        {
+            downloadProgress?.Invoke(this, e);
+        }
+
+        /// <summary>
+        ///     Raises the download failed event.
+        /// </summary>
+        /// <param name="e"></param>
+        protected void RaiseDownloadFailed(ExceptionEventArgs e)
+        {
+            downloadFailed?.Invoke(this, e);
+        }
+
+        /// <summary>
+        ///     Raises the decode failed event.
+        /// </summary>
+        /// <param name="e"></param>
+        protected void RaiseDecodeFailed(ExceptionEventArgs e)
+        {
+            decodeFailed?.Invoke(this, e);
+        }
+
+        /// <summary>
         ///     Get the size of the specified array and of the elements in it.
         /// </summary>
         /// <param name="pixels">
@@ -474,222 +526,54 @@ namespace Microsoft.DwayneNeed.Media.Imaging
         /// <param name="elementType">
         ///     On output, will contain the type of the elements in the array.
         /// </param>
-        private void ValidateArrayAndGetInfo(Array pixels,
-                                             out int elementSize,
-                                             out int sourceBufferSize,
-                                             out Type elementType)
+        private static void ValidateArrayAndGetInfo(
+            Array pixels,
+            out int elementSize,
+            out int sourceBufferSize,
+            out Type elementType)
         {
             //
             // Assure that a valid pixels Array was provided.
             //
-            if (pixels == null)
+            if (pixels is null)
             {
-                throw new ArgumentNullException("pixels");
+                throw new ArgumentNullException(nameof(pixels));
             }
 
             if (pixels.Rank == 1)
             {
                 if (pixels.GetLength(0) <= 0)
                 {
-                    throw new ArgumentException("pixels");
-                }
-                else
-                {
-                    checked
-                    {
-                        object exemplar = pixels.GetValue(0);
-                        elementSize = Marshal.SizeOf(exemplar);
-                        sourceBufferSize = pixels.GetLength(0) * elementSize;
-                        elementType = exemplar.GetType();
-                    }
+                    throw new ArgumentException(nameof(pixels));
                 }
 
+                checked
+                {
+                    var exemplar = pixels.GetValue(0);
+                    elementSize = Marshal.SizeOf(exemplar);
+                    sourceBufferSize = pixels.GetLength(0) * elementSize;
+                    elementType = exemplar.GetType();
+                }
             }
             else if (pixels.Rank == 2)
             {
                 if (pixels.GetLength(0) <= 0 || pixels.GetLength(1) <= 0)
                 {
-                    throw new ArgumentException("pixels");
+                    throw new ArgumentException(nameof(pixels));
                 }
-                else
+
+                checked
                 {
-                    checked
-                    {
-                        object exemplar = pixels.GetValue(0, 0);
-                        elementSize = Marshal.SizeOf(exemplar);
-                        sourceBufferSize = pixels.GetLength(0) * pixels.GetLength(1) * elementSize;
-                        elementType = exemplar.GetType();
-                    }
+                    var exemplar = pixels.GetValue(0, 0);
+                    elementSize = Marshal.SizeOf(exemplar);
+                    sourceBufferSize = pixels.GetLength(0) * pixels.GetLength(1) * elementSize;
+                    elementType = exemplar.GetType();
                 }
             }
             else
             {
-                throw new ArgumentException("pixels");
+                throw new ArgumentException(nameof(pixels));
             }
         }
-        #endregion BitmapSource CopyPixels
-
-        #region BitmapSource Download
-
-        /// <summary>
-        ///     Whether or not the BitmapSource is downloading content.
-        /// </summary>
-        /// <remarks>
-        ///     This is not applicable to all CustomBitmap classes, so
-        ///     the base implementation return false.
-        /// </remarks>
-        public override bool IsDownloading
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        ///     Raised when the downloading of content is completed.
-        /// </summary>
-        /// <remarks>
-        ///     This is not applicable to all CustomBitmap classes, so
-        ///     the base implementation does nothing.
-        /// </remarks>
-        public override event EventHandler DownloadCompleted
-        {
-            add
-            {
-                _downloadCompleted += value;
-            }
-
-            remove
-            {
-                _downloadCompleted -= value;
-            }
-        }
-
-        /// <summary>
-        ///     Raises the dowload completed event.
-        /// </summary>
-        /// <param name="e"></param>
-        protected void RaiseDownloadCompleted()
-        {
-            EventHandler downloadCompleted = _downloadCompleted;
-            if (downloadCompleted != null)
-            {
-                downloadCompleted(this, EventArgs.Empty);
-            }
-        }
-
-        private EventHandler _downloadCompleted;
-
-        /// <summary>
-        ///     Raised when the downloading of content has progressed.
-        /// </summary>
-        /// <remarks>
-        ///     This is not applicable to all CustomBitmap classes, so
-        ///     the base implementation does nothing.
-        /// </remarks>
-        public override event EventHandler<DownloadProgressEventArgs> DownloadProgress
-        {
-            add
-            {
-                _downloadProgress += value;
-            }
-
-            remove
-            {
-                _downloadProgress -= value;
-            }
-        }
-
-        /// <summary>
-        ///     Raises the dowload progress event.
-        /// </summary>
-        /// <param name="e"></param>
-        protected void RaiseDownloadProgress(DownloadProgressEventArgs e)
-        {
-            EventHandler<DownloadProgressEventArgs> downloadProgress = _downloadProgress;
-            if (downloadProgress != null)
-            {
-                downloadProgress(this, e);
-            }
-        }
-
-        private EventHandler<DownloadProgressEventArgs> _downloadProgress;
-
-        /// <summary>
-        ///     Raised when the downloading of content has failed.
-        /// </summary>
-        /// <remarks>
-        ///     This is not applicable to all CustomBitmap classes, so
-        ///     the base implementation throws.
-        /// </remarks>
-        public override event EventHandler<ExceptionEventArgs> DownloadFailed
-        {
-            add
-            {
-                _downloadFailed += value;
-            }
-
-            remove
-            {
-                _downloadFailed -= value;
-            }
-        }
-
-        /// <summary>
-        ///     Raises the dowload failed event.
-        /// </summary>
-        /// <param name="e"></param>
-        protected void RaiseDownloadFailed(ExceptionEventArgs e)
-        {
-            EventHandler<ExceptionEventArgs> downloadFailed = _downloadFailed;
-            if (downloadFailed != null)
-            {
-                downloadFailed(this, e);
-            }
-        }
-
-        private EventHandler<ExceptionEventArgs> _downloadFailed;
-
-        #endregion BitmapSource Download
-
-        #region BitmapSource Decode
-
-        /// <summary>
-        ///     Raised when the downloading of content has progressed.
-        /// </summary>
-        /// <remarks>
-        ///     This is not applicable to all CustomBitmap classes, so
-        ///     the base implementation does nothing.
-        /// </remarks>
-        public override event EventHandler<ExceptionEventArgs> DecodeFailed
-        {
-            add
-            {
-                _decodeFailed += value;
-            }
-
-            remove
-            {
-                _decodeFailed -= value;
-            }
-        }
-
-        /// <summary>
-        ///     Raises the decode failed event.
-        /// </summary>
-        /// <param name="e"></param>
-        protected void RaiseDecodeFailed(ExceptionEventArgs e)
-        {
-            EventHandler<ExceptionEventArgs> decodeFailed = _decodeFailed;
-            if (decodeFailed != null)
-            {
-                decodeFailed(this, e);
-            }
-        }
-
-        private EventHandler<ExceptionEventArgs> _decodeFailed;
-
-        #endregion BitmapSource Decode
     }
 }

@@ -1,22 +1,19 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Effects;
-
-namespace BlendModeEffectLibrary
+﻿namespace BlendModeEffectLibrary
 {
-	public class VividLightEffect : BlendModeEffect
-	{
-		static VividLightEffect()
-		{
-			_pixelShader.UriSource = Global.MakePackUri("ShaderSource/VividLightEffect.ps");
-		}
+    using System.Windows.Media.Effects;
 
-		public VividLightEffect()
-		{
-			this.PixelShader = _pixelShader;
-		}
+    public class VividLightEffect : BlendModeEffect
+    {
+        private static readonly PixelShader pixelShader = new PixelShader();
 
-		private static PixelShader _pixelShader = new PixelShader();
-	}
+        static VividLightEffect()
+        {
+            pixelShader.UriSource = Global.MakePackUri("ShaderSource/VividLightEffect.ps");
+        }
+
+        public VividLightEffect()
+        {
+            PixelShader = pixelShader;
+        }
+    }
 }

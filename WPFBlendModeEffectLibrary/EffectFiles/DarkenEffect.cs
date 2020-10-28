@@ -1,22 +1,19 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Effects;
-
-namespace BlendModeEffectLibrary
+﻿namespace BlendModeEffectLibrary
 {
-	public class DarkenEffect : BlendModeEffect
-	{
-		static DarkenEffect()
-		{
-			_pixelShader.UriSource = Global.MakePackUri("ShaderSource/DarkenEffect.ps");
-		}
+    using System.Windows.Media.Effects;
 
-		public DarkenEffect()
-		{
-			this.PixelShader = _pixelShader;
-		}
+    public class DarkenEffect : BlendModeEffect
+    {
+        private static readonly PixelShader pixelShader = new PixelShader();
 
-		private static PixelShader _pixelShader = new PixelShader();
-	}
+        static DarkenEffect()
+        {
+            pixelShader.UriSource = Global.MakePackUri("ShaderSource/DarkenEffect.ps");
+        }
+
+        public DarkenEffect()
+        {
+            PixelShader = pixelShader;
+        }
+    }
 }

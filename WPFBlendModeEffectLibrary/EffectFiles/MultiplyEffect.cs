@@ -1,22 +1,19 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Effects;
-
-namespace BlendModeEffectLibrary
+﻿namespace BlendModeEffectLibrary
 {
-	public class MultiplyEffect : BlendModeEffect
-	{
-		static MultiplyEffect()
-		{
-			_pixelShader.UriSource = Global.MakePackUri("ShaderSource/MultiplyEffect.ps");
-		}
+    using System.Windows.Media.Effects;
 
-		public MultiplyEffect()
-		{
-			this.PixelShader = _pixelShader;
-		}
+    public class MultiplyEffect : BlendModeEffect
+    {
+        private static readonly PixelShader pixelShader = new PixelShader();
 
-		private static PixelShader _pixelShader = new PixelShader();
-	}
+        static MultiplyEffect()
+        {
+            pixelShader.UriSource = Global.MakePackUri("ShaderSource/MultiplyEffect.ps");
+        }
+
+        public MultiplyEffect()
+        {
+            PixelShader = pixelShader;
+        }
+    }
 }

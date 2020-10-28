@@ -1,22 +1,19 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Effects;
-
-namespace BlendModeEffectLibrary
+﻿namespace BlendModeEffectLibrary
 {
-	public class AverageEffect : BlendModeEffect
-	{
-		static AverageEffect()
-		{
-			_pixelShader.UriSource = Global.MakePackUri("ShaderSource/AverageEffect.ps");
-		}
+    using System.Windows.Media.Effects;
 
-		public AverageEffect()
-		{
-			this.PixelShader = _pixelShader;
-		}
+    public class AverageEffect : BlendModeEffect
+    {
+        private static readonly PixelShader pixelShader = new PixelShader();
 
-		private static PixelShader _pixelShader = new PixelShader();
-	}
+        static AverageEffect()
+        {
+            pixelShader.UriSource = Global.MakePackUri("ShaderSource/AverageEffect.ps");
+        }
+
+        public AverageEffect()
+        {
+            PixelShader = pixelShader;
+        }
+    }
 }
