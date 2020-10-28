@@ -2,7 +2,7 @@
 	x:Class="WPFTestHarness.RedBulbWindow"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+	xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
 	xmlns:bme="clr-namespace:BlendModeEffectLibrary;assembly=BlendModeEffectLibrary"
 	xmlns:local="clr-namespace:WPFTestHarness"
 	Title="RedBulbWindow"
@@ -52,7 +52,7 @@
 						</LinearGradientBrush.GradientStops>
 					</LinearGradientBrush>
 				</Path.Fill>
-				<i:Interaction.Behaviors>
+				<b:Interaction.Behaviors>
 					<local:BackgroundEffectBehavior Visual="{Binding ElementName=backgroundCanvas, Mode=OneWay}">
 						<local:BackgroundEffectBehavior.Effect>
 							<bme:ScreenEffect>
@@ -82,7 +82,7 @@
 							</bme:ScreenEffect>
 						</local:BackgroundEffectBehavior.Effect>
 					</local:BackgroundEffectBehavior>
-				</i:Interaction.Behaviors>
+				</b:Interaction.Behaviors>
 			</Path>
 		</Canvas>
 	</Grid>
